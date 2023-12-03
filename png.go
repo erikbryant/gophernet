@@ -39,7 +39,11 @@ func imageToSlice(img *image.Gray) []float64 {
 	for y := bounds.Min.Y + frameWidth; y < bounds.Max.Y-frameWidth; y++ {
 		for x := bounds.Min.X + frameWidth; x < bounds.Max.X-frameWidth; x++ {
 			c := img.GrayAt(y, x)
-			s = append(s, float64(c.Y))
+			scalar := 0.0
+			if c.Y == 0 {
+				scalar = 1.0
+			}
+			s = append(s, scalar)
 		}
 	}
 
