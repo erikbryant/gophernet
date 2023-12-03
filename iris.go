@@ -12,9 +12,11 @@ import (
 var (
 	trainingData = "irisData/train.csv"
 	testData     = "irisData/test.csv"
+	inputCols    = 4
+	labelCols    = 3
 )
 
-func makeInputsAndLabels(fileName string) (*mat.Dense, *mat.Dense) {
+func irisInputsAndLabels(fileName string) (*mat.Dense, *mat.Dense) {
 	// Open the dataset file
 	f, err := os.Open(fileName)
 	if err != nil {
@@ -24,7 +26,7 @@ func makeInputsAndLabels(fileName string) (*mat.Dense, *mat.Dense) {
 
 	// Create a new CSV reader reading from the opened file
 	reader := csv.NewReader(f)
-	reader.FieldsPerRecord = 7
+	reader.FieldsPerRecord = inputCols + labelCols
 
 	// Read in all of the CSV records
 	rawCSVData, err := reader.ReadAll()
@@ -35,8 +37,8 @@ func makeInputsAndLabels(fileName string) (*mat.Dense, *mat.Dense) {
 	// inputsData and labelsData will hold all the
 	// float values that will eventually be
 	// used to form matrices
-	inputsData := make([]float64, 4*len(rawCSVData))
-	labelsData := make([]float64, 3*len(rawCSVData))
+	inputsData := make([]float64, inputCols*len(rawCSVData))
+	labelsData := make([]float64, labelCols*len(rawCSVData))
 
 	// Will track the current index of matrix values
 	var inputsIndex int
@@ -72,8 +74,24 @@ func makeInputsAndLabels(fileName string) (*mat.Dense, *mat.Dense) {
 		}
 	}
 
-	inputs := mat.NewDense(len(rawCSVData), 4, inputsData)
-	labels := mat.NewDense(len(rawCSVData), 3, labelsData)
+	inputs := mat.NewDense(len(rawCSVData), inputCols, inputsData)
+	labels := mat.NewDense(len(rawCSVData), labelCols, labelsData)
 
 	return inputs, labels
+}
+
+// iris returns the network config and train/test data for the iris dataset
+func iris() (neuralNetConfig, *mat.Dense, *mat.Dense, *mat.Dense, *mat.Dense) {
+	config := neuralNetConfig{
+		inputNeurons:  inputCols,
+		outputNeurons: labelCols,
+		hiddenNeurons: 3,
+		numEpochs:     5000,
+		learningRate:  0.3,
+	}
+
+	inputs, labels := irisInputsAndLabels(trainingData)
+	testInputs, testLabels := irisInputsAndLabels(testData)
+
+	return config, inputs, labels, testInputs, testLabels
 }

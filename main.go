@@ -6,18 +6,9 @@ import (
 )
 
 func main() {
-	// Load the training and testing matrices
-	inputs, labels := makeInputsAndLabels(trainingData)
-	testInputs, testLabels := makeInputsAndLabels(testData)
+	config, inputs, labels, testInputs, testLabels := iris()
+	config, inputs, labels, testInputs, testLabels = handwriting()
 
-	// Create and train the neural network
-	config := neuralNetConfig{
-		inputNeurons:  4,
-		outputNeurons: 3,
-		hiddenNeurons: 3,
-		numEpochs:     5000,
-		learningRate:  0.3,
-	}
 	network := newNetwork(config)
 	if err := network.train(inputs, labels); err != nil {
 		log.Fatal(err)
