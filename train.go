@@ -4,10 +4,12 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// backpropagate completes the backpropagation method
-func (nn *neuralNet) backpropagate(x, y, output *mat.Dense) error {
-	// Loop over the number of epochs utilizing
-	// backpropagation to train our model
+// backpropagate implements the backpropagation method
+func (nn *neuralNet) backpropagate(x, y *mat.Dense) error {
+	// Define the output of the neural network
+	output := new(mat.Dense)
+
+	// Loop over the epochs, using backpropagation to train the model
 	for i := 0; i < nn.config.numEpochs; i++ {
 		// Complete the feed forward process
 		hiddenLayerInput := new(mat.Dense)
@@ -72,16 +74,13 @@ func (nn *neuralNet) backpropagate(x, y, output *mat.Dense) error {
 	return nil
 }
 
-// train uses backpropagation to train a neural network
-func (nn *neuralNet) train(x, y *mat.Dense) error {
+// train trains the neural network on the given dataset
+func (nn *neuralNet) train(inputs, labels *mat.Dense) error {
 	// Start with random weights and biases
 	nn.randomize()
 
-	// Define the output of the neural network
-	output := new(mat.Dense)
-
 	// Use backpropagation to tune the weights and biases
-	if err := nn.backpropagate(x, y, output); err != nil {
+	if err := nn.backpropagate(inputs, labels); err != nil {
 		return err
 	}
 
