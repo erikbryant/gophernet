@@ -5,7 +5,7 @@ import (
 )
 
 // backpropagate implements the backpropagation method
-func (nn *neuralNet) backpropagate(x, y *mat.Dense) error {
+func (nn *neuralNet) backpropagate(x, y *mat.Dense) {
 	// Define the output of the neural network
 	output := new(mat.Dense)
 
@@ -64,8 +64,6 @@ func (nn *neuralNet) backpropagate(x, y *mat.Dense) error {
 		bHiddenAdj.Scale(nn.config.learningRate, bHiddenAdj)
 		nn.bHidden.Add(nn.bHidden, bHiddenAdj)
 	}
-
-	return nil
 }
 
 // train trains the neural network on the given dataset
@@ -74,9 +72,7 @@ func (nn *neuralNet) train(inputs, labels *mat.Dense) error {
 	nn.randomize()
 
 	// Use backpropagation to tune the weights and biases
-	if err := nn.backpropagate(inputs, labels); err != nil {
-		return err
-	}
+	nn.backpropagate(inputs, labels)
 
 	nn.isTrained = true
 
