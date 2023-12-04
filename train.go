@@ -51,10 +51,7 @@ func (nn *neuralNet) backpropagate(x, y *mat.Dense) error {
 		wOutAdj.Scale(nn.config.learningRate, wOutAdj)
 		nn.wOut.Add(nn.wOut, wOutAdj)
 
-		bOutAdj, err := sumAlongAxis(0, dOutput)
-		if err != nil {
-			return err
-		}
+		bOutAdj := sumColumns(dOutput)
 		bOutAdj.Scale(nn.config.learningRate, bOutAdj)
 		nn.bOut.Add(nn.bOut, bOutAdj)
 
@@ -63,10 +60,7 @@ func (nn *neuralNet) backpropagate(x, y *mat.Dense) error {
 		wHiddenAdj.Scale(nn.config.learningRate, wHiddenAdj)
 		nn.wHidden.Add(nn.wHidden, wHiddenAdj)
 
-		bHiddenAdj, err := sumAlongAxis(0, dHiddenLayer)
-		if err != nil {
-			return err
-		}
+		bHiddenAdj := sumColumns(dHiddenLayer)
 		bHiddenAdj.Scale(nn.config.learningRate, bHiddenAdj)
 		nn.bHidden.Add(nn.bHidden, bHiddenAdj)
 	}

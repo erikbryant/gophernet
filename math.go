@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"math"
 
 	"gonum.org/v1/gonum/floats"
@@ -49,36 +48,25 @@ func clamp(x float64) float64 {
 
 func actFunc(x float64) float64 {
 	return clamp(sigmoid(x))
+	// return relu(x)
 }
 
 func actFuncPrime(x float64) float64 {
 	return clamp(sigmoidPrime(x))
+	// return reluPrime(x)
 }
 
-// sumAlongAxis sums a matrix along one dimension, preserving the other
-func sumAlongAxis(axis int, m *mat.Dense) (*mat.Dense, error) {
-	numRows, numCols := m.Dims()
-
+// sumColumns sums a matrix's columns
+func sumColumns(m *mat.Dense) *mat.Dense {
+	_, numCols := m.Dims()
 	var output *mat.Dense
+	data := make([]float64, numCols)
 
-	switch axis {
-	case 0:
-		data := make([]float64, numCols)
-		for i := 0; i < numCols; i++ {
-			col := mat.Col(nil, i, m)
-			data[i] = floats.Sum(col)
-		}
-		output = mat.NewDense(1, numCols, data)
-	case 1:
-		data := make([]float64, numRows)
-		for i := 0; i < numRows; i++ {
-			row := mat.Row(nil, i, m)
-			data[i] = floats.Sum(row)
-		}
-		output = mat.NewDense(numRows, 1, data)
-	default:
-		return nil, errors.New("invalid axis, must be 0 or 1")
+	for i := 0; i < numCols; i++ {
+		col := mat.Col(nil, i, m)
+		data[i] = floats.Sum(col)
 	}
+	output = mat.NewDense(1, numCols, data)
 
-	return output, nil
+	return output
 }
