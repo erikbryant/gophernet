@@ -18,24 +18,24 @@ func (nn *neuralNet) backpropagate(x, y *mat.Dense) error {
 		hiddenLayerInput.Apply(addBHidden, hiddenLayerInput)
 
 		hiddenLayerActivations := new(mat.Dense)
-		applySigmoid := func(_, _ int, v float64) float64 { return sigmoid(v) }
-		hiddenLayerActivations.Apply(applySigmoid, hiddenLayerInput)
+		activationFcn := func(_, _ int, v float64) float64 { return actFunc(v) }
+		hiddenLayerActivations.Apply(activationFcn, hiddenLayerInput)
 
 		outputLayerInput := new(mat.Dense)
 		outputLayerInput.Mul(hiddenLayerActivations, nn.wOut)
 		addBOut := func(_, col int, v float64) float64 { return v + nn.bOut.At(0, col) }
 		outputLayerInput.Apply(addBOut, outputLayerInput)
-		output.Apply(applySigmoid, outputLayerInput)
+		output.Apply(activationFcn, outputLayerInput)
 
 		// Complete the backpropagation
 		networkError := new(mat.Dense)
 		networkError.Sub(y, output)
 
 		slopeOutputLayer := new(mat.Dense)
-		applySigmoidPrime := func(_, _ int, v float64) float64 { return sigmoidPrime(v) }
-		slopeOutputLayer.Apply(applySigmoidPrime, output)
+		activationFcnPrime := func(_, _ int, v float64) float64 { return actFuncPrime(v) }
+		slopeOutputLayer.Apply(activationFcnPrime, output)
 		slopeHiddenLayer := new(mat.Dense)
-		slopeHiddenLayer.Apply(applySigmoidPrime, hiddenLayerActivations)
+		slopeHiddenLayer.Apply(activationFcnPrime, hiddenLayerActivations)
 
 		dOutput := new(mat.Dense)
 		dOutput.MulElem(networkError, slopeOutputLayer)
