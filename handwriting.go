@@ -10,12 +10,12 @@ import (
 )
 
 var (
-	trainingDataDir = "chars/by_class/%2x/train/"
-	testDataDir     = "chars/by_class/%2x/hsf_0/"
-	imageLen        = 11664
+	trainingDataDir = "chars/by_class/%2x/hsf_0/"
+	testDataDir     = "chars/by_class/%2x/hsf_1/"
+	imageLen        = 5450
 	symbolCount     = 10
 	symbolStart     = 0x30
-	maxDatasets     = 500
+	maxDatasets     = 50
 )
 
 func filesInDir(dir string) ([]string, error) {
@@ -80,8 +80,8 @@ func handwriting() (neuralNetConfig, *mat.Dense, *mat.Dense, *mat.Dense, *mat.De
 	config := neuralNetConfig{
 		inputNeurons:  imageLen,
 		outputNeurons: symbolCount,
-		hiddenNeurons: 2000,
-		numEpochs:     10,
+		hiddenNeurons: imageLen,
+		numEpochs:     400,
 		learningRate:  0.3,
 	}
 
