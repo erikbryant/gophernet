@@ -1,7 +1,6 @@
 package main
 
 import (
-	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -11,9 +10,6 @@ func (nn *neuralNet) predict(x *mat.Dense) (*mat.Dense, error) {
 		return nil, err
 	}
 
-	// Define the output of the neural network
-	output := new(mat.Dense)
-
 	// Complete the feed forward process
 	hiddenLayerInput := new(mat.Dense)
 	hiddenLayerInput.Mul(x, nn.wHidden)
@@ -21,46 +17,51 @@ func (nn *neuralNet) predict(x *mat.Dense) (*mat.Dense, error) {
 	hiddenLayerInput.Apply(addBHidden, hiddenLayerInput)
 
 	hiddenLayerActivations := new(mat.Dense)
-	applySigmoid := func(_, _ int, v float64) float64 { return sigmoid(v) }
-	hiddenLayerActivations.Apply(applySigmoid, hiddenLayerInput)
+	activationFcn := func(_, _ int, v float64) float64 { return actFunc(v) }
+	hiddenLayerActivations.Apply(activationFcn, hiddenLayerInput)
 
 	outputLayerInput := new(mat.Dense)
 	outputLayerInput.Mul(hiddenLayerActivations, nn.wOut)
 	addBOut := func(_, col int, v float64) float64 { return v + nn.bOut.At(0, col) }
 	outputLayerInput.Apply(addBOut, outputLayerInput)
-	output.Apply(applySigmoid, outputLayerInput)
+
+	// Define the output of the neural network
+	output := new(mat.Dense)
+	output.Apply(activationFcn, outputLayerInput)
 
 	return output, nil
 }
 
-// evaluate tests the accuracy of a neural network
-func (nn *neuralNet) evaluate(testInputs, testLabels *mat.Dense) (float64, error) {
+// correct returns true if the prediction is correct
+func correct(pRow, tRow []float64) bool {
+	maxI := 0
+	maxVal := 0.0
+
+	for i, val := range pRow {
+		if val > maxVal {
+			maxVal = val
+			maxI = i
+		}
+	}
+
+	return tRow[maxI] == 1.0
+}
+
+// accuracy tests the accuracy of a neural network
+func (nn *neuralNet) accuracy(testInputs, testLabels *mat.Dense) (float64, error) {
 	// Make the predictions using the trained model
 	predictions, err := nn.predict(testInputs)
 	if err != nil {
 		return 0.0, err
 	}
 
-	// Calculate the accuracy of our model
-	var truePosNeg int
-	numPreds, _ := predictions.Dims()
-	for i := 0; i < numPreds; i++ {
-		// Get the label
-		labelRow := mat.Row(nil, i, testLabels)
-		var prediction int
-		for idx, label := range labelRow {
-			if label == 1.0 {
-				prediction = idx
-				break
-			}
-		}
-
-		// Accumulate the true positive/negative count
-		if predictions.At(i, prediction) == floats.Max(mat.Row(nil, i, predictions)) {
-			truePosNeg++
+	predCount, _ := predictions.Dims()
+	predCorrect := 0
+	for i := 0; i < predCount; i++ {
+		if correct(mat.Row(nil, i, predictions), mat.Row(nil, i, testLabels)) {
+			predCorrect++
 		}
 	}
 
-	// Return the accuracy (subset accuracy)
-	return float64(truePosNeg) / float64(numPreds), nil
+	return float64(predCorrect) / float64(predCount), nil
 }
