@@ -24,11 +24,6 @@ func main() {
 	}
 
 	config, inputs, labels, testInputs, testLabels := iris()
-
-	// The neural network is not scalable enough to handing the
-	// handwriting images. The network would need at least one
-	// more hidden layer and would need hours (days?) of training
-	// time to generate a reliable model.
 	config, inputs, labels, testInputs, testLabels = handwriting()
 
 	network := newNetwork(config)
